@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Comment from "./Comment";
@@ -29,6 +29,7 @@ border-bottom:1px solid ${({theme})=>theme.soft};
 width:50%;
 background-color:transparent;
 outline:none;
+color: ${({theme})=>theme.text}
 `
 const AddComment = styled.button`
 width:60px;
@@ -48,27 +49,39 @@ const Comments = ()=>{
     const {currentUser} = useSelector(state=>state.user)
     const currentUserId = currentUser._id
     const currentVideoId = currentVideo._id
+    const [getAllComments, setGetAllComments] = useState([])
+ 
     const saveComment = async ()=>{
-        // const newComment = await axios.post("/api/users/comments",{comment,currentUserId,currentVideoId})
-        // const saveComment = await newComment.
+        const newComment = await axios.post("/api/users/comments",{comment,videoId:currentVideoId})
+        const getComments = await axios.get(`/api/users/comments/${currentVideoId}`)
+                setGetAllComments(getComments.data)
     }
+
+
+    useEffect(()=>{
+        const fetchComments = async()=>{
+            try {
+                const getComments = await axios.get(`/api/users/comments/${currentVideoId}`)
+                setGetAllComments(getComments.data)
+
+                 
+            } catch (error) {
+                
+            }
+        }
+
+        fetchComments()
+    },[currentVideoId])
+
+    
     return(
         <Container>
             <NewComments>
-                <Avatar src="https://tse2.mm.bing.net/th?id=OIP.vt1bevOqmHU6DYGdq-6L9gHaEo&pid=Api&P=0&w=267&h=167"></Avatar>
+                <Avatar src={currentUser.img}></Avatar>
                 <Input placeholder="Enter Comments...." onChange={e=>setcomment(e.target.value)}></Input>
                 <AddComment onClick={saveComment}>Add </AddComment>
             </NewComments>
-            <Comment/>
-            <Comment/>
-            <Comment/>
-            <Comment/>
-            <Comment/>
-            <Comment/>
-            <Comment/>
-            <Comment/>
-            <Comment/>
-            <Comment/>
+             {getAllComments.map(data=>(<Comment data={data}/>))}
         </Container>
     )
 }

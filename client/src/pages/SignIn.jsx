@@ -6,6 +6,7 @@ import { loginFailure, loginStart, loginSuccess } from "../redux/userSlice";
 import {auth,provider} from "../firebase";
 import { signInWithPopup} from "firebase/auth"
 import { async } from "@firebase/util";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -97,12 +98,29 @@ const SignIn = () => {
   const [password,setPassword] = useState("");
   const [email,setEmail] = useState("");
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+ 
+
+    const handaleSignUp = async ()=>{
+      dispatch(loginStart())
+      try {
+        const signUp = await axios.post("/api/users/signup",{name,password,email})
+        dispatch(loginSuccess(signUp.data))
+        navigate("/")
+      } catch (error) {
+        dispatch(loginFailure())
+      }
+    }
+    
 
   const handleLogin = async (e)=>{
+
+
     dispatch(loginStart())
     try {
       const login = await axios.post("/api/users/signin",{name,password});
       dispatch(loginSuccess(login.data))
+      navigate("/")
     } catch (error) {
       dispatch(loginFailure())
       
@@ -119,6 +137,7 @@ const SignIn = () => {
         img:result.user.photoURL,
       }).then((res)=>{
         dispatch(loginSuccess(res.data))
+        navigate("/")
       }).catch((error)=>{
          dispatch(loginFailure())
       })
@@ -132,7 +151,7 @@ const SignIn = () => {
         <Title>Sign in</Title>
         <SubTitle>to continue to LamaTube</SubTitle>
         <Input placeholder="username" onChange={e=>setName(e.target.value)}/>
-        <Input type="password" placeholder="password"  onChange={e=>setPassword(e.target.value)}/>
+        <Input type="password" placeholder="password"  onChange={e=>setPassword(e.target.value)} required={true}/>
           <Button onClick={handleLogin}>Sign in</Button>
         <ButtonWrapper onClick={signInWithGoogle}>
           <GoogleIcon src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgdrU73TrWVm9mDZeJGzBmzYWlxgpzGmQNel8oddZ6MeybWXRDA8eK&usqp=CAE&s"/>
@@ -142,7 +161,7 @@ const SignIn = () => {
         <Input placeholder="username" onChange={e=>setName(e.target.value)}/>
         <Input placeholder="email" onChange={e=>setEmail(e.target.value)}/>
         <Input type="password" placeholder="password" onChange={e=>setPassword(e.target.value)}/>
-        <Button>Sign up</Button>
+        <Button onClick={handaleSignUp}>Sign up</Button>
       </Wrapper>
       <More>
         English(USA)

@@ -1,13 +1,14 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect ,useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { format} from "timeago.js";
 
 const Container = styled.div`
 display:flex;
 margin-top:30px;
 align-items:center;
 gap:30px;
-border:1px solid red;
 
 `
 
@@ -16,11 +17,11 @@ width:60px;
 height:60px;
 border-radius:50%;
 margin-top:10px;
+border:none;
 `
 const Text = styled.p`
     color: ${({theme})=>theme.text};
     width:100%;
-    border:1px solid green;
      
 `
 
@@ -30,7 +31,6 @@ const ChannelNmae = styled.h1`
 `
 const Detail = styled.div`
 width:100%;
-border:1px solid blue;
 
 `
 const Detail_1 = styled.div`
@@ -43,17 +43,29 @@ const PostDate = styled.p`
     font-size:12px
 `
 
-const Comment = ()=>{
-    
+const Comment =   ({data})=>{
+    const [userName,setUserName] = useState("")
+    const [userImg,setUserImg] = useState("")
+    useEffect(()=>{
+        const fetchUser = async ()=>{
+            const userId = data.userId
+             const userData = await axios.get(`/api/users/find/${userId}`)
+            setUserImg(userData.data.img)
+            setUserName(userData.data.name)
+         
+        }
+
+        fetchUser()
+    },[data])
     return(
         <Container>
-            <Avatar src="https://tse2.mm.bing.net/th?id=OIP.vt1bevOqmHU6DYGdq-6L9gHaEo&pid=Api&P=0&w=267&h=167"></Avatar>
+            <Avatar src= {userImg}></Avatar>
             <Detail>
                 <Detail_1>
-                    <ChannelNmae>Luma mon</ChannelNmae>
-                    <PostDate>2 day ago</PostDate>
+                    <ChannelNmae>{ userName}</ChannelNmae>
+                    <PostDate>{ format(data.createdAt)}</PostDate>
                 </Detail_1>
-                <Text> this is my commnent </Text>
+                <Text> { data.comment} </Text>
             </Detail>
             
         </Container>

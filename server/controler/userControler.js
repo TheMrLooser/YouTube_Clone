@@ -38,16 +38,61 @@ const deleteUser = async (req,res,next)=>{
         return next(createError(403,"You can't delete this account"))
        }
 }
-     
+   
 
+const like = async(req,res,next)=>{
+    const videoId = req.params.id;
+    const userId = req.user.id;
+    
+    const Video = await VideoSchema.findById(videoId)
+    const user = await userSchema.findById(userId)
+    if(Video.dislikes.includes(userId)){
+        const pull =  await VideoSchema.findByIdAndUpdate(videoId,{$pull:{dislikes:userId}});
+        const push = await VideoSchema.findByIdAndUpdate(videoId,{$push:{likes:userId}})
+        if(!user.likedVideo.includes(videoId)){
+            const push = await userSchema.findByIdAndUpdate(userId,{$push:{likedVideo:videoId}})
+        }
+    } 
+    if(Video.likes.includes(userId)){
+        res.status(401).json({success:false,message:"Already liked"})
+    }
+    
+    if(!Video.likes.includes(userId)){
+        const push = await VideoSchema.findByIdAndUpdate(videoId,{$push:{likes:userId}})
+        res.status(200).json({success:true,message:"liked"})
+        if(!user.likedVideo.includes(videoId)){
+            const push = await userSchema.findByIdAndUpdate(userId,{$push:{likedVideo:videoId}})
+        }
+    }
 
-const like = (req,res,next)=>{
-     
+    
 }
 
-const dislike = (req,res,next)=>{
-     
+
+const dislike = async(req,res,next)=>{
+    const videoId = req.params.id;
+    const userId = req.user.id;
+    
+    const Video = await VideoSchema.findById(videoId)
+
+    if(Video.likes.includes(userId)){
+        const pull =  await VideoSchema.findByIdAndUpdate(videoId,{$pull:{likes:userId}});
+        const push = await VideoSchema.findByIdAndUpdate(videoId,{$push:{dislikes:userId}})
+        
+    } 
+    if(Video.dislikes.includes(userId)){
+        res.status(401).json({success:false,message:"Already disliked"})
+    }
+    
+    if(!Video.dislikes.includes(userId)){
+        const push = await VideoSchema.findByIdAndUpdate(videoId,{$push:{dislikes:userId}})
+        res.status(200).json({success:true,message:"disliked"})
+
+    }
+
+    
 }
+
 
 const getUser = async (req,res,next)=>{
 
@@ -60,31 +105,27 @@ const getUser = async (req,res,next)=>{
 }
  
 const subscribe = async (req,res,next)=>{
-     try {
-        const getVideo = await VideoSchema.findById(req.params.videoId)
-         
-        const getuser = await userSchema.findById(req.body.userId)
-         
-        await userSchema.findOneAndUpdate(getVideo._id,{$push :{subscribedUser:req.user.id}});
-        await userSchema.findOneAndUpdate( getVideo._id,{$inc:{subscribers:1}})
-        await
-        res.status(200).json({success:true,message:"subscribed"})
-     } catch (error) {
-        next(error)
-     }
+    
 }
 
 const unsubscribe = async (req,res,next)=>{
-    try {
-        await userSchema.findOneAndUpdate(req.params.id,{$pull :{subscribedUser:req.params.id}});
-        await userSchema.findOneAndUpdate(req.params.id,{$inc:{subscribers:-1}})
-        res.status(200).json({success:true,message:"unsubscribed"})
-     } catch (error) {
-        next(error)
-     }
+    
+}
+
+const savedVideo = async (req,res,next)=>{
+    const videoId = req.params.id;
+    const userId = req.user.id
+    const user  = await userSchema.findById(userId)
+    if(user.savedVideo.includes(videoId)){
+        await userSchema.findByIdAndUpdate(userId,{$pull:{savedVideo:videoId}})
+        res.status(200).json({success:true,message:"Removed"})
+    }
+    if(!user.savedVideo.includes(videoId)){
+        await userSchema.findByIdAndUpdate(userId,{$push:{savedVideo:videoId}})
+        res.status(200).json({success:true,message:"saved"})
+    }
 }
 
 
 
-
-module.exports = {update,unsubscribe,subscribe,getUser,dislike,like,deleteUser , logout}
+module.exports = {update,unsubscribe,subscribe,getUser,dislike,like,deleteUser , logout ,savedVideo}

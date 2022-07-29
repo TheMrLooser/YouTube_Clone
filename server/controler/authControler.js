@@ -10,7 +10,7 @@ const signup =async (req,res,next)=>{
         const hash = await bcrypt.hash(req.body.password,10)
         const newUser = new userSchema({...req.body,password:hash})
         await newUser.save();
-        res.status(200).send("user created !")
+        res.status(200).send( )
     } catch (error) {
         next(error)
     }

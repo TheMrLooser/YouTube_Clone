@@ -8,7 +8,10 @@ import Home from "./pages/Home";
 import {BrowserRouter , Route,Routes} from "react-router-dom"
 import Video from "./pages/Video";
 import SignIn from "./pages/SignIn";
-
+import Subscribed from "./pages/Subscribed";
+import Library from "./pages/Library";
+import Profile from "./pages/Profile";
+import Search from "./pages/Search";
 
 const Container = styled.div`
 display: flex;  
@@ -39,11 +42,14 @@ function App() {
                         <Route path="/"> 
                           <Route index element={<Home type="random"/>} />  
                           <Route path="trends" element={<Home type="trend"/>} />  
-                          <Route path="subscribed" element={<Home type="subscribed"/>} />  
+                          <Route path="subscribed" element={<Subscribed  />} />  
                           <Route index path="signin" element={<SignIn/>} />  
                           <Route path="video">
                             <Route path=":id"  element  ={<Video type="random" />} />
                           </Route>
+                          <Route path="library" element={<Library/>}>  </Route>
+                          <Route path="profile" element={<Profile/>}>  </Route>
+                          <Route path="search" element={<Search/>}></Route>
                         </Route>
                       </Routes>
                   </Wrapper>

@@ -10,7 +10,7 @@ const CommentSchema = new mongoose.Schema({
         required:true,
         type:String, 
     },
-    desc:{
+    comment:{
         required:true,
         type:String, 
     }, 

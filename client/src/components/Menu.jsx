@@ -19,7 +19,7 @@ import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { Link } from "react-router-dom";
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
-
+import "../style/mobileMenu.css"
 import {useSelector} from "react-redux";
  
 
@@ -29,12 +29,26 @@ const Container = styled.div`
     height:100vh;
     color:${({theme})=>theme.text};
     position:sticky;
-    top:0px
+    top:0px;
+    @media only screen and (max-width:900px){
+     width:50px;
+     position:fixed;
+    
+    }
+    @media only screen and (max-width:450px){
+        
+    
+    }
 
 `
 const Wrapper = styled.div`
 padding-left:30px; 
 padding-top:10px;
+@media only screen and (max-width:900px){
+    padding-left:10px; 
+
+
+    }
 
 `
 const Logo = styled.div`
@@ -63,12 +77,17 @@ border:0.5px solid #323232;
 margin-top:15px;
 margin-right:15px;
 margin-bottom:15px;
-
+@media only screen and (max-width:450px){
+     display:none;
+}
 `
 
 const Login = styled.div`
 display:flex;
 flex-direction:column;
+@media only screen and (max-width:900px){
+     display:none;
+}
 
 `
 const Button = styled.button`
@@ -87,6 +106,13 @@ cursor:pointer;
 `
 const MenuLogo = styled.div`
 `
+const Text  = styled.span`
+@media only screen and (max-width:900px){
+    display:none;
+     
+}
+
+`
 
 const Menu = ({darkMode,setDarkMode  })=>{
     const setShowMenu = ()=>{
@@ -101,50 +127,53 @@ const Menu = ({darkMode,setDarkMode  })=>{
     }
 
 
+    const setbackground = ()=>{
+        
+    }
+
 
     const {currentUser} = useSelector(state=>state.user)
 
     return( <>
             
-            <Container id="menuContainer">
-                <Wrapper>
+            <Container id="mainContainer">
+                <Wrapper id="menuContainer">
                     
-                <Logo>
-                    <div onClick={()=>setShowMenu()}><MenuOutlinedIcon style={{cursor:"pointer"}} /></div>
+                <Logo id="logo" className="dispNone">
                     <Link to={'/'} style={{textDecoration:"none",color:"inherit"}}>
                     Humper Tube
                     </Link>
                 </Logo>
                 
-                    <Link to={'/'} style={{textDecoration:"none",color:"inherit"}}><Item> <HomeOutlinedIcon/>Home </Item></Link>
-                    <Link to={'/trends'} style={{textDecoration:"none",color:"inherit"}}><Item> <ExploreOutlinedIcon/>Explore </Item></Link>
-                    <Link to={'/subscribed'} style={{textDecoration:"none",color:"inherit"}}><Item> <SubscriptionsOutlinedIcon/>Subscribe </Item></Link>
-                    <Hr/>
-                    <Item> <VideoLibraryOutlinedIcon/>Library </Item>
-                    <Item> <HistoryOutlinedIcon/>History </Item>
-                    <Hr/>
+                    <Link to={'/'} style={{textDecoration:"none",color:"inherit"}} onClick={setbackground}><Item id="home"> <HomeOutlinedIcon/><Text>Home</Text> </Item></Link>
+                    <Link to={'/trends'} style={{textDecoration:"none",color:"inherit"}}><Item id="explere"> <ExploreOutlinedIcon/><Text>Explore</Text> </Item></Link>
+                    <Link to={'/subscribed'} style={{textDecoration:"none",color:"inherit"}}><Item id="sub"> <SubscriptionsOutlinedIcon/><Text>Subscribe</Text> </Item></Link>
+                    <Hr className="dispNone"/>
+                   <Link to={'/library'} style={{textDecoration:"none",color:"inherit"}}> <Item id="library"> <VideoLibraryOutlinedIcon/><Text>Library</Text> </Item> </Link>
+                    <Item id="history" className="dispNone"> <HistoryOutlinedIcon/><Text>History</Text> </Item>
+                    <Hr id="hr" className="dispNone"/>
 
-                    {   
-                        !currentUser &&
-                        <>
+                    {/* {    */}
+                        {/* !currentUser && */}
+                        {/* <> */}
                             <Login>
                                 Sign in to like video,comment and subscribe.
-                                <Link to={'/signin'} style={{textDecoration:"none"}}><Button><AccountCircleOutlinedIcon/>SIGN IN</Button></Link>
+                                <Link to={'/signin'} style={{textDecoration:"none"}}><Button><AccountCircleOutlinedIcon/><Text>SIGN IN</Text></Button></Link>
                             </Login>
                             <Hr/>
-                        </>
-                    }
-                    <Item> <LibraryMusicOutlinedIcon/>Music </Item>
-                    <Item> <SportsBasketballOutlinedIcon/>Sports </Item>
-                    <Item> <SportsEsportsOutlinedIcon/>Gamings </Item>
-                    <Item> <MovieOutlinedIcon/>Movies </Item>
-                    <Item> <ArticleOutlinedIcon/>News </Item>
-                    <Item> <LiveTvOutlinedIcon/>Live </Item>
-                    <Hr/>
-                    <Item> <SettingsOutlinedIcon/>Settings </Item>
-                    <Item> <ReportOutlinedIcon/>Report </Item>
-                    <Item> <HelpOutlineOutlinedIcon/>Help </Item>
-                    <Item onClick={()=>setDarkMode(!darkMode)}> {darkMode? <DarkModeIcon/>:<WbSunnyOutlinedIcon/>}  {darkMode?"Dark Mode":"Light Mode"} </Item>
+                        {/* </> */}
+                    {/* } */}
+                    <Item id="music"> <LibraryMusicOutlinedIcon/><Text>Music</Text> </Item>
+                    <Item id="sport" className="dispNone"> <SportsBasketballOutlinedIcon/><Text>Sports</Text> </Item>
+                    <Item id="game" className="dispNone"> <SportsEsportsOutlinedIcon/><Text>Gamings</Text> </Item>
+                    <Item id="movie" className="dispNone"> <MovieOutlinedIcon/><Text>Movies</Text> </Item>
+                    <Item id="news" className="dispNone"> <ArticleOutlinedIcon/><Text>News</Text> </Item>
+                    <Item id="live" className="dispNone"> <LiveTvOutlinedIcon/><Text>Live</Text> </Item>
+                    <Hr id="hr" className="dispNone"/>
+                    <Item id="setting" > <SettingsOutlinedIcon/><Text>Settings</Text> </Item>
+                    <Item id="report" className="dispNone"> <ReportOutlinedIcon/><Text>Report</Text> </Item>
+                    <Item id="help" className="dispNone"> <HelpOutlineOutlinedIcon/><Text>Help</Text> </Item>
+                    <Item id="mode" onClick={()=>setDarkMode(!darkMode)}> {darkMode? <DarkModeIcon/>:<WbSunnyOutlinedIcon/>}  {darkMode?<Text>Dark Mode</Text>:<Text>Light Mode</Text>} </Item>
 
                 </Wrapper>
             </Container>

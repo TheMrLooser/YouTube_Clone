@@ -1,0 +1,58 @@
+@media only screen and (max-width:450px){
+   
+    #menuContainer{
+        display: flex;
+         flex-direction: row;
+         border: 1px solid lightslategrey;
+         width: 100%;
+        position: relative;
+        bottom: 0px;
+        gap: 40px;
+        justify-content: center;
+        align-items: center;
+        
+    }
+    #mainContainer{
+        position: fixed;
+        display: flex;
+        margin-top: 50px;
+        width: 100%;
+        height: 50px;
+        
+    }
+    .dispNone{
+        display: none;
+    }
+    #logo{
+        display: none;
+    }
+    #music{
+        display: none;
+
+    }
+    #history{
+        display: none;
+    }
+    #help{
+        display: none;
+    }
+    #report{
+        display: none;
+    }
+    #game{
+        display: none;
+    }
+    #sport{
+        display: none;
+    }
+    #movie{
+        display: none;
+    }
+    #live{
+        display: none;
+    }
+    #news{
+        display: none;
+    }
+
+}

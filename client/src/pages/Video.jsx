@@ -12,8 +12,9 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import {fetchFailure, fetchStart, fetchSuccess} from "../redux/videoSlice.js"
 import { format} from "timeago.js";
-import { async } from "@firebase/util";
-
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import { loginFailure, loginStart, loginSuccess } from "../redux/userSlice";
 
 
 
@@ -24,6 +25,17 @@ const Container = styled.div`
 display:flex;
 gap:24px;
 background-color:${({theme})=>theme.bg};
+@media only screen and (max-width:900px){
+margin-left:50px;
+}
+@media only screen and (max-width:450px){
+flex-direction:column;
+justify-content:center;
+align-items:center;
+margin-left:0px;
+
+}
+
 `
 const Content = styled.div`
 flex:5;
@@ -31,7 +43,12 @@ padding:10px;
 
 `
 const VideoWrapper = styled.div`
-
+@media only screen and (max-width:450px){
+     if(offsetTop>300){
+        margin-top:500px;
+     }
+     
+}
 
 `
 const Tital = styled.h1`
@@ -100,8 +117,8 @@ margin-top:10px;
 const Subscribe = styled.button`
     width:150px;
     height:30px;
-    background-color: red;
-    border-radius:5%;
+    background-color: ${({type})=>type ==="Subscribe"? "red":"green"};
+    border-radius:5px;
     cursor:pointer;
     font-size:20px;
     font-weight:500;
@@ -133,9 +150,14 @@ margin:5px 0px;
 
 const Recomdetion = styled.div`
 flex:2;
+padding-top:20px;
 
+@media only screen and (max-width:450px){
+    padding-top:0px;
 
-` 
+}
+
+`  
 
 const Video = ({type})=>{
     const dispatch = useDispatch()
@@ -144,29 +166,16 @@ const Video = ({type})=>{
     const path = useLocation().pathname.split("/")[2]
     const [randomVideos,setRandomVideos] = useState([])
     const [channel,setChannel] = useState({})
-      
-    // useEffect(()=>{
-    //     const fetchData = async ()=>{
-    //         try {
-    //             fetchStart()
-    //             const getVideo = await axios.get(`/api/video/${path}`)
-    //             const getChannel = await axios.get(`/api/users/find/${getVideo.data.userId}`);
-                 
-    //             setChannel(getChannel.data)
-    //             dispatch(fetchSuccess(getVideo.data))
-    //         } catch (error) {
-    //             fetchFailure() 
-    //         }
-    //     }
-    //     fetchData()
-    // },[path , dispatch])
+    const [checkSubscribe,setcheckSubscribe] = useState("")
+    const [likes,setLikes] = useState(0)
+    const [dislikes,setDislikes] = useState(0)
+    const [fromGoogle,setFromGoogle] = useState(false)
 
         useEffect(()=>{
            
             const fetchRandomvideo = async ()=>{
                 try {
                     const getRandomVideo = await axios.get(`/api/video/${type}`);
-                    // console.log(getRandomVideo.data)
                     setRandomVideos(getRandomVideo.data)
                 } catch (error) {
                     console.log(error)
@@ -175,24 +184,42 @@ const Video = ({type})=>{
             }
 
             const fetchVideos = async ()=>{
-                
+         
                 dispatch(fetchStart())
                 try {
                     const getVideo = await axios.get(`/api/video/${path}`)
                     const getChannel = await axios.get(`/api/users/find/${getVideo.data.userId}`);
                     setChannel(getChannel.data)
                     dispatch(fetchSuccess(getVideo.data))
+                    
+                    
+                    const check  = getChannel.data.subscribedUser.includes(currentUser._id)
+                    if(check){
+                        setcheckSubscribe("Unsubscribe")
+                    }else{
+                        setcheckSubscribe("Subscribe")
+                    }
+                    setLikes(getVideo.data.likes.length)
+                    setDislikes(getVideo.data.dislikes.length)
+                 
                 } catch (error) {
                     dispatch(fetchFailure())
+                    
+                    
                 }
         
                 }
+
+
+
+                
+
         
                 fetchVideos()
             
 
                 fetchRandomvideo()
-        },[type])
+        },[type , dispatch])
 
 
         
@@ -217,31 +244,73 @@ const Video = ({type})=>{
 
     const subscribe = async ()=>{
          const userId = currentVideo.userId
-        await axios.put(`/api/video/subscribe/${userId}`)
+         
+        const data = await axios.put(`/api/video/subscribe/${userId}`)
         .catch(function(error){
             if(error ){
-                console.log(error)
+                console.log(error.response.data.message)
             }
         })
-         console.log(currentVideo.userId)
+          
+         setcheckSubscribe(data.data)
          
     }
+
+    const addLike = async ()=>{
+        const videoId = currentVideo._id
+        const data = await axios.put(`/api/users/like/${videoId}`).catch(function(error){
+            if(error){
+                console.log(error.response.data.message)
+            }
+        })
+        const Video = await axios.get(`/api/video/${videoId}`)
+
+        setLikes(Video.data.likes.length)
+        setDislikes(Video.data.dislikes.length)
+    }
+    const addDislike = async ()=>{
+
+        const videoId = currentVideo._id
+        const data = await axios.put(`/api/users/dislike/${videoId}`).catch(function(error){
+            if(error){
+                console.log(error.response.data.message)
+            }
+        })
+        const Video = await axios.get(`/api/video/${videoId}`)
+        setLikes(Video.data.likes.length)
+        setDislikes(Video.data.dislikes.length)
+ 
+          
+    }
+     
+
+    const saveVideo = async ()=>{
+        const videoId = currentVideo._id
+       const save =  await axios.put(`/api/users/save/${videoId}`) 
+    }
+
+
+ 
+    
     return( 
         <Container>
             <Content>
-               <VideoWrapper>
-                    <iframe width="100%" height="600" src="https://www.youtube.com/embed/gpqoZQ8GNK8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-                    </iframe>
+               <VideoWrapper id="videoConte">
+                     <video src={currentVideo.videoUrl}  style={{width:"100%" }} controls>
+                        
+                        
+   
+                    </video>
                             
                </VideoWrapper>
                <Tital>{currentVideo.tital}</Tital>
                <Detail>
                     <Info>{ currentVideo.views} views . { format(currentVideo.createdAt)}</Info>
                     <Buttons>
-                        <Button>  <ThumbUpOffAltIcon/>{currentVideo.likes} </Button>
-                        <Button>  <ThumbDownOffAltIcon/>Dislike </Button>
-                        <Button>  <ReplyIcon/>Share </Button>
-                        <Button>  <AddTaskOutlinedIcon/>Save </Button>
+                        <Button onClick={addLike}> {currentVideo.likes.includes(currentUser._id) ? <ThumbUpIcon/>:<ThumbUpOffAltIcon/>} {likes} </Button>
+                        <Button onClick={addDislike}> {currentVideo.dislikes.includes(currentUser._id) ? <ThumbDownIcon/> :<ThumbDownOffAltIcon/> } { dislikes} </Button>
+                        <Button >  <ReplyIcon/>Share </Button>
+                        <Button onClick={saveVideo}>  <AddTaskOutlinedIcon  /> {currentUser.savedVideo.includes(currentVideo._id) ? "Saved":"Save"} </Button>
                     </Buttons>
                </Detail>
                <Hr/>
@@ -254,7 +323,7 @@ const Video = ({type})=>{
                             <Description>{ currentVideo.desc} </Description>
                         </ChannelDetail>
                     </ChannelInfo>
-                    <Subscribe onClick={subscribe}>Subscribe</Subscribe>
+                    <Subscribe onClick={subscribe} type={checkSubscribe} >{checkSubscribe}</Subscribe>
                </Channel>
                <Hr/>
                <Comments/>

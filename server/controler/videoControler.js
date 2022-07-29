@@ -18,7 +18,7 @@ const updateVideo = async (req,res,next)=>{
         if (!video) return next(createError(404,"Video Not Found"));
         if(req.user.id=== video.userId){
             const updatevideo = await videoSchema.findOneAndUpdate(req.params.id,{$set:req.body},{new:true})
-
+ 
             res.status(200).json(updatevideo)
         }else{
             return next(createError(403,"You cant update this video"))
@@ -59,13 +59,13 @@ const addView = async (req,res,next)=>{
         const video = await videoSchema.findById(req.params.id)
         if (!video) return next(createError(404,"vodeo not  found"))
         const changeView = video.views + 1
-        await videoSchema.updateOne({views:changeView })
+        await videoSchema.findByIdAndUpdate(req.params.id,{$set:{views:changeView}},{new:true})
          res.status(200).json( video)
     } catch (error) {
        next(error)
     }
 }
-
+  
 const randomVideo = async (req,res,next)=>{
     try {
         const videos =  await videoSchema.aggregate([{$sample:{size:20}}])
@@ -93,23 +93,36 @@ const subscribed = async (req,res,next)=>{
         const channelUser = await userSchema.findById(channelId);
         const user = await userSchema.findById(userId);
         if(channelUser.subscribedUser.includes(user.id)){ 
-                next( createError(400,"Allready Subscribed"))
+                // next( createError(400,"Allready Subscribed"))
+                const channelSubscribedUser = await userSchema.findByIdAndUpdate(channelId,{$pull:{subscribedUser:userId}},{new:true})
+                const  channelSubscriber  =  await userSchema.findByIdAndUpdate(channelId ,{$set:{subscribers:channelUser.subscribedUser.length -1}} );
+                // console.log(channelSubscribedUser)
+                res.status(200).json("unSubscribed")
+
             }
-        else {
+        else { 
             // channel side 
             const channelSubscribedUser =   await userSchema.findByIdAndUpdate(channelId,{$push :{subscribedUser:[userId]} },{new:true});
             const  channelSubscriber  =  await userSchema.findByIdAndUpdate(channelId ,{$set:{subscribers:channelUser.subscribedUser.length +1}} );
             
             // user side
             const subscribedChannels =  await userSchema.findByIdAndUpdate(userId,{$push:{subscribedChannels:[channelId]}})
+            res.status(200).json("Subscribed") 
         }
- 
-        res.status(200).json("Subscribed")
-        
-    } catch (error) {
+  
+         
+    } catch (error) { 
        next(error)
     }
 } 
+
+const sendSavedVideo = async (req,res,next)=>{
+    const userId = req.user.id;
+    const user = await userSchema.findById(userId)
+    const video = await videoSchema.find()
+    res.status(200).json(video)
+}
+ 
 
 
 const getByTags = async (req,res,next)=>{
@@ -125,6 +138,7 @@ const getByTags = async (req,res,next)=>{
 
 const search = async (req,res,next)=>{
     const query = req.query.q;
+    
     try {
         const video =  await videoSchema.find({tital:{$regex:query,$options:"i"}}).limit(40);
         if(!video == []){
@@ -136,4 +150,4 @@ const search = async (req,res,next)=>{
     }
 } 
 
-module.exports = {addVideo , search ,updateVideo,getByTags ,getVideo,subscribed,trend,randomVideo,addView,deleteVideo }
+module.exports = {addVideo ,sendSavedVideo, search ,updateVideo,getByTags ,getVideo,subscribed,trend,randomVideo,addView,deleteVideo }
